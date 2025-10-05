@@ -298,7 +298,7 @@ function showDetailModal(data) {
             const objectId = data.koi_name || data.object_id || 'N/A';
             treeTitle.textContent = `Analyzing Decision Path for: ${objectId}`;
             treeContainer.innerHTML = `<p class="text-brand-muted animate-pulse">Generating path for ${objectId}...</p>`;
-            fetch(`${API_BASE_URL}/decision_path`, {
+            fetch('${API_BASE_URL}/decision_path', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
@@ -692,6 +692,7 @@ function createStellarTypeChart(results) {
     </script>
 </body>
 </html>
+
 
 
 
