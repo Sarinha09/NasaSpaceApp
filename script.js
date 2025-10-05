@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://api-oqt6.onrender.com';
+const API_BASE_URL = 'https://api-nasaspaceapps.onrender.com';
 
 // Configuração do Tailwind CSS
 tailwind.config = {
@@ -307,4 +307,5 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => console.error('Error fetching model metrics:', error));
     }
 })
+
 
