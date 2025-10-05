@@ -1,4 +1,6 @@
 const API_BASE_URL = 'https://api-oqt6.onrender.com';
+
+// Configuração do Tailwind CSS
 tailwind.config = {
     theme: {
         extend: {
@@ -60,7 +62,7 @@ function handleFileSelect(event) {
             return trimmedLine !== '' && !trimmedLine.startsWith('#');
         });
         if (validLines.length === 0) {
-            alert("O arquivo CSV esta vazio de dados");
+            alert("The CSV file contains no data");
             return;
         }
         const headerLine = validLines[0];
@@ -69,7 +71,7 @@ function handleFileSelect(event) {
         const headers = headerLine.split(delimiter).map(h => h.trim().replace(/"/g, ''));
         const mappingSelects = document.querySelectorAll('.mapping-select');
         mappingSelects.forEach(select => {
-            select.innerHTML = '<option value="">Selecionar Coluna</option>';
+            select.innerHTML = '<option value="">Select Column</option>';
             headers.forEach(header => {
                 const option = document.createElement('option');
                 option.value = header;
@@ -99,12 +101,13 @@ function getMappedData() {
         const formData = new FormData(form);
         const singleEntry = {};
         for(let [key, value] of formData.entries()) {
-            if(!value) { alert('Por favor, preencha todos os campos.'); return null; }
+            if(!value) { alert('Please fill in all fields.'); return null; }
             singleEntry[key] = value;
         }
         return [singleEntry];
     }
-    if (parsedData.length === 0) { alert('Nenhum dado encontrado no arquivo CSV.'); return null; }
+    if (parsedData.length === 0) { alert('No data found in the CSV file.');
+return null; }
     return parsedData;
 }
 
@@ -120,33 +123,33 @@ function analyzeData() {
             if (!s.value) allMapped = false;
             mapping[s.dataset.required] = s.value;
         });
-        if (!allMapped) { alert('Por favor, mapeie todas as colunas obrigatórias.'); return; }
+        if (!allMapped) { alert('Please map all required columns.');return; }
     } else {
         requiredColumns.forEach(col => mapping[col] = col);
     }
     const payload = { data: dataToAnalyze, mapping: mapping };
     const analysisButton = document.querySelector('#data-input button[onclick="analyzeData()"]');
-    analysisButton.textContent = 'Analisando...';
+    analysisButton.textContent = 'Analyzing...';
     analysisButton.disabled = true;
-     fetch(`${API_BASE_URL}/predict`, { 
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-        })
+    fetch(`${API_BASE_URL}/predict`, { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+    })
     .then(response => {
-        if (!response.ok) { throw new Error('A resposta da rede não foi OK'); }
+        if (!response.ok) { throw new Error('Network response was not OK'); }
         return response.json();
     })
     .then(results => {
         localStorage.setItem('analysisResults', JSON.stringify(results));
-        window.location.href = 'results.html';
+        window.location.href = '/results';
     })
     .catch(error => {
-        console.error('Erro ao chamar a API:', error);
-        alert('Ocorreu um erro ao analisar os dados.');
-        analysisButton.textContent = 'Analisar Dados';
+        console.error('Error calling the API:', error);
+        alert('An error occurred while analyzing the data.');
+        analysisButton.textContent = 'Analyze Data';
         analysisButton.disabled = false;
     });
 }
@@ -156,11 +159,12 @@ function analyzeData() {
 // =========================================================================
 document.addEventListener('DOMContentLoaded', () => {
     // --- Lógica Geral (roda em todas as páginas) ---
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) entry.target.classList.add('visible');
         });
-    }, { threshold: 0.1 });
+    }, {threshold: 0.1});
     document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
     const navbar = document.getElementById('navbar');
     if (navbar) {
@@ -174,6 +178,17 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
     }
+    const swiper = new Swiper('.swiper', {
+        loop: true, // Faz o loop das slides
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+    });
 
     // --- Lógica da Seção de Entrada de Dados (só roda na index.html) ---
     const dataInputSection = document.getElementById('data-input');
@@ -185,36 +200,59 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="flex items-center justify-between bg-brand-dark border border-gray-700 p-3 rounded-lg">
                     <label for="map-${col}" class="text-sm font-medium text-brand-muted mr-2">${col.replace(/_/g, ' ')}:</label>
                     <select id="map-${col}" data-required="${col}" class="mapping-select bg-brand-surface border border-gray-600 text-white text-sm rounded-lg p-2 w-1/2 focus:ring-brand-primary focus:border-brand-primary">
-                        <option value="">Selecionar Coluna</option>
+                        <option value="">Select Column</option>
                     </select>
                 </div>`;
             columnMappingContainer.appendChild(div);
         });
         document.getElementById('csv-file-input').addEventListener('change', handleFileSelect);
+
+        const fileInput = document.getElementById('csv-file-input');
+        const fileNameDisplay = document.getElementById('file-name-display');
+
+        if (fileInput && fileNameDisplay) {
+            fileInput.addEventListener('change', function () {
+                if (this.files && this.files.length > 0) {
+                    fileNameDisplay.textContent = this.files[0].name;
+                } else {
+                    fileNameDisplay.textContent = 'No file chosen';
+                }
+            });
+        }
     }
 
     // --- Lógica da Seção do Modelo de IA (só roda na index.html) ---
+    //
     const aiModelSection = document.getElementById('ai-model');
     if (aiModelSection) {
         const chartTextColor = '#9ca3af';
-        // 1. Busca os dados reais da API
-             fetch(`${API_BASE_URL}/model_metrics`) // <-- MUDANÇA AQUI
+
+
+         fetch(`${API_BASE_URL}/model_metrics`)
             .then(response => response.json())
             .then(metrics => {
-                // Atualiza os textos de Acurácia, Precisão e Recall
+
+                // 1. Atualiza os textos de acurácia, precisão, etc.
                 document.getElementById('metric-accuracy').textContent = (metrics.accuracy * 100).toFixed(2);
                 document.getElementById('metric-precision').textContent = (metrics.classification_report['weighted avg'].precision * 100).toFixed(2);
                 document.getElementById('metric-recall').textContent = (metrics.classification_report['weighted avg'].recall * 100).toFixed(2);
 
-                // 2. CRIA O GRÁFICO DA MATRIZ DE CONFUSÃO APENAS AQUI, com os dados reais
-                const ctx = document.getElementById('confusionMatrixChart').getContext('2d');
+                // 2. Cria o Gráfico da Matriz de Confusão
+                const confusionCtx = document.getElementById('confusionMatrixChart').getContext('2d');
                 const classNames = metrics.class_names;
                 const matrixData = metrics.confusion_matrix;
                 const datasets = classNames.map((name, index) => {
                     let label = '', color = '';
-                    if (name === 'CONFIRMED') { label = 'Predito Confirmado'; color = '#22c55e'; }
-                    else if (name === 'CANDIDATE') { label = 'Predito Candidato'; color = '#facc15'; }
-                    else { label = 'Predito Falso Positivo'; color = '#ef4444'; }
+                    if (name === 'CONFIRMED') {
+                        label = 'Predicted Confirmed';
+                        color = '#22c55e';
+                    } else if (name === 'CANDIDATE') {
+                        label = 'Predicted Candidate';
+                        color = '#facc15';
+                    } else {
+                        label = 'Predicted False Positive';
+                        color = '#ef4444';
+                    }
                     return {
                         label: label,
                         data: [matrixData[0][index], matrixData[1][index], matrixData[2][index]],
@@ -222,43 +260,50 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
                 });
 
-                new Chart(ctx, {
+                new Chart(confusionCtx, {
                     type: 'bar',
-                    data: { labels: classNames, datasets: datasets },
+                    data: {labels: classNames, datasets: datasets},
                     options: {
                         responsive: true,
-                        plugins: { legend: { labels: { color: chartTextColor } } },
+                        plugins: {legend: {labels: {color: chartTextColor}}},
                         scales: {
-                            x: { stacked: true, ticks: { color: chartTextColor }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                            y: { stacked: true, ticks: { color: chartTextColor }, title: { display: true, text: 'Real', color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                            x: {stacked: true, ticks: {color: chartTextColor}, grid: {color: 'rgba(255,255,255,0.1)'}},
+                            y: {
+                                stacked: true,
+                                ticks: {color: chartTextColor},
+                                title: {display: true, text: 'Actual Class', color: 'white'},
+                                grid: {color: 'rgba(255,255,255,0.1)'}
+                            }
                         }
                     }
                 });
-            })
-            .catch(error => console.error('Erro ao buscar as métricas do modelo:', error));
 
-        // 3. O gráfico de Importância das Features (que é estático) continua sendo criado aqui
-        new Chart(document.getElementById('featureImportanceChart'), {
-            type: 'bar',
-            data: {
-                labels: ['Profundidade Trânsito', 'Raio Planeta', 'Período Orbital', 'Raio Estelar', 'Temp. Estelar'],
-                datasets: [{
-                    label: 'Importância',
-                    data: [0.35, 0.25, 0.18, 0.12, 0.1],
-                    backgroundColor: ['#38bdf8', '#6366f1', '#38bdf8', '#6366f1', '#38bdf8'],
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: chartTextColor }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                    y: { ticks: { color: chartTextColor }, grid: { display: false } }
+                // 3. Cria o Gráfico de Feature Importance
+                const importanceCtx = document.getElementById('featureImportanceChart').getContext('2d');
+                if (metrics.feature_importances) {
+                    new Chart(importanceCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: metrics.feature_importances.features,
+                            datasets: [{
+                                label: 'Importance',
+                                data: metrics.feature_importances.importances,
+                                backgroundColor: ['#38bdf8', '#6366f1', '#38bdf8', '#6366f1', '#38bdf8', '#6366f1', '#38bdf8'],
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            plugins: {legend: {display: false}},
+                            scales: {
+                                x: {ticks: {color: chartTextColor}, grid: {color: 'rgba(255,255,255,0.1)'}},
+                                y: {ticks: {color: chartTextColor}, grid: {display: false}}
+                            }
+                        }
+                    });
                 }
-            }
-        });
+
+            })
+            .catch(error => console.error('Error fetching model metrics:', error));
     }
-
-});
-
+})
