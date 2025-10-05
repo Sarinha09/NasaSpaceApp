@@ -1,4 +1,4 @@
-// Configuração do Tailwind CSS
+const API_BASE_URL = 'https://api-oqt6.onrender.com';
 tailwind.config = {
     theme: {
         extend: {
@@ -128,11 +128,13 @@ function analyzeData() {
     const analysisButton = document.querySelector('#data-input button[onclick="analyzeData()"]');
     analysisButton.textContent = 'Analisando...';
     analysisButton.disabled = true;
-    fetch('/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-    })
+     fetch(`${API_BASE_URL}/predict`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        })
     .then(response => {
         if (!response.ok) { throw new Error('A resposta da rede não foi OK'); }
         return response.json();
@@ -196,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aiModelSection) {
         const chartTextColor = '#9ca3af';
         // 1. Busca os dados reais da API
-        fetch('/model_metrics')
+             fetch(`${API_BASE_URL}/model_metrics`) // <-- MUDANÇA AQUI
             .then(response => response.json())
             .then(metrics => {
                 // Atualiza os textos de Acurácia, Precisão e Recall
@@ -257,4 +259,5 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
 });
