@@ -278,7 +278,7 @@ function showDetailModal(data) {
             treeTitle.textContent = 'Example of a Random Decision Tree';
             treeContainer.innerHTML = `<p class="text-brand-muted animate-pulse">Loading a random tree from the model...</p>`;
 
-            fetch('/random_tree_image')
+            fetch('${API_BASE_URL}/random_tree_image')
                 .then(response => response.json())
                 .then(data => {
                     if (data.image) {
@@ -298,7 +298,7 @@ function showDetailModal(data) {
             const objectId = data.koi_name || data.object_id || 'N/A';
             treeTitle.textContent = `Analyzing Decision Path for: ${objectId}`;
             treeContainer.innerHTML = `<p class="text-brand-muted animate-pulse">Generating path for ${objectId}...</p>`;
-            fetch('/decision_path', {
+            fetch('${API_BASE_URL}/decision_path', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
@@ -692,3 +692,4 @@ function createStellarTypeChart(results) {
     </script>
 </body>
 </html>
+
