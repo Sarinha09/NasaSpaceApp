@@ -141,7 +141,7 @@ function analyzeData() {
     })
     .then(results => {
         localStorage.setItem('analysisResults', JSON.stringify(results));
-        window.location.href = '/results';
+        window.location.href = 'results.html';
     })
     .catch(error => {
         console.error('Erro ao chamar a API:', error);
@@ -261,3 +261,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
